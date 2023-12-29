@@ -4,7 +4,6 @@ body {
 
 #card {
   box-shadow: 20px 20px 30px rgba(50, 50, 50, 0.21);
-
   position: relative;
   width: 320px;
   display: block;
