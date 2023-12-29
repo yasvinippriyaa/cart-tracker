@@ -5,4 +5,4 @@
 3. Install npm packages mentioned in package.json
 4. Run server.js file and goto http://localhost:3000/ through your browser.
 
-Note: To use the payment gateway feature, [create a Stripe account here](https://dashboard.stripe.com/register)https://dashboard.stripe.com/register
+Note: To use the payment gateway feature, [create a Stripe account here](https://dashboard.stripe.com/register)
