@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Register - WestView</title>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/all.css'>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.2.0/css/fontawesome.css'>
+    <link rel="stylesheet" href="/style?page=\\frontend\\css\\register-style.css">
+
+</head>
+
+<body onload="setup();">
+    <div class="container">
+        <div class="screen">
+            <div class="screen__content">
+                <!-- form -->
+                <form class="login" action="new-user" method="post">
+                    <div class="login__field">
+                        <i class="login__icon fas fa-at"></i>
+                        <input type="text" class="login__input" placeholder="Email" name="email">
+                    </div>
+					<div class="login__field">
+						<i class="login__icon fas fa-user"></i>
+						<input type="text" class="login__input" placeholder="Username" name="username">
+					</div>
+					<div class="login__field">
+						<i class="login__icon fas fa-phone"></i>
+						<input type="text" class="login__input" placeholder="Phone Number" name="contact">
+					</div>
+                    <div class="login__field">
+                        <i class="login__icon fas fa-lock"></i>
+                        <input type="password" class="login__input" placeholder="Password" name="pw">
+                    </div>
+					<div class="login__field">
+						<i class="login__icon fas fa-lock"></i>
+						<input type="password" class="login__input" placeholder="Confirm Password" name="confirm">
+					</div>
+
+                    <button class="button login__submit">
+                        <span class="button__text">Sign Up</span>
+                        <i class="button__icon fas fa-chevron-right"></i>
+                    </button>
+                </form>
+                <!-- end of form -->
+                <div class="social-login">
+                    <h4 style="text-align: left;">Not your first time?</h4>
+                    <a href="/" style="text-decoration: none;color:#ffff">
+                        <button class="button register_button">
+                            Log in
+                            <i style="color:#ffff" class="button__icon fas fa-chevron-right"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+            <div class="screen__background">
+                <span class="screen__background__shape screen__background__shape4"></span>
+                <span class="screen__background__shape screen__background__shape3"></span>
+                <span class="screen__background__shape screen__background__shape2"></span>
+                <span class="screen__background__shape screen__background__shape1"></span>
+            </div>
+        </div>
+    </div>
+<script>
+        function setup() {
+            document.forms[0].reset();
+            var valCook = document.cookie;
+            var valArr = valCook.split('; ').join("=").split("=");
+            var cookStr = "{" + '"' + valArr[0] + '"' + ":" + '"' + valArr[1] + '"' + "," + '"' + valArr[2] + '"' + ":" + '"' + valArr[3] + '"' + "," + '"' + valArr[4] + '"' + ":" + '"' + valArr[5] + '"' + "}";
+            var cookOBJ = JSON.parse(cookStr);
+            // console.log(cookOBJ);
+
+            if (cookOBJ.validity == "false") {
+                alert("Invalid credentials! Try again");
+            }
+
+        }
+</script>
+</body>
+
+</html>

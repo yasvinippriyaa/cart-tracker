@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WestView</title>
+  <link rel="stylesheet" href="/style?page=\\frontend\\css\home-style.css">
+</head>
+<body onunload="clean();">
+  <div class="container">
+    <div class="checkoutLayout">
+        <div class="returnCart">
+            <h1>List Product in Cart</h1>
+            <div class="emptylist">
+              </div>
+            <div class="list"> 
+              <!-- no product  -->
+            </div>
+        </div>
+
+        <div class="right">
+          <h1>Checkout</h1>
+
+          <div class="form">
+              <div class="group">
+                <br>
+                <center><span class="dot" id="initial"></span></center>
+                <br>
+                <h1 id="username">Name</h1>
+                <h1 id="contact">Phone number</h1>
+              </div> 
+          </div>
+
+          <div class="return">
+              <div class="row">
+                  <div>Total Quantity</div>
+                  <div class="totalQuantity">0</div>
+              </div>
+              <div class="row">
+                  <div>Total Price</div>
+                  <div class="totalPrice">₹ 0</div>
+              </div>
+          </div>
+
+          <button class="buttonCheckout">CHECKOUT</button>
+          </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+  <script> 
+    function clean(){
+      var cookStr = 'username=""; contact=""; validity=true';
+      document.cookie = cookStr;
+    }
+
+    var valCook = document.cookie;
+    var valArr = valCook.split('; ').join("=").split("=");
+    var cookStr = "{" + '"' + valArr[0] + '"' + ":" + '"' + valArr[1] + '"' + "," + '"' + valArr[2] + '"' + ":" + '"' + valArr[3] + '"' + "," + '"' + valArr[4] + '"' + ":" + '"' + valArr[5] + '"' + "}";
+    var cookOBJ = JSON.parse(cookStr);
+
+    document.getElementById("username").innerHTML = cookOBJ.username;
+    document.getElementById("contact").innerHTML = cookOBJ.contact;
+    document.getElementById("initial").innerHTML = cookOBJ.username[0];
+
+    const socket = io("localhost:3000/");
+    
+    const productDetails = {}; // to store product details and quantity
+    var n = 1;
+    var billamt =0;
+    var quan = 0;
+    const emptylistDiv = document.getElementsByClassName('emptylist')[0];
+
+    emptylistDiv.innerHTML="No products added! ";
+    socket.on('file-update', (details) => {
+      const listDiv = document.getElementsByClassName('list')[0];
+
+      details.forEach((detail) => {
+        quan+=1;
+        const productId = detail.product_id;
+        emptylistDiv.innerHTML="";
+
+        // product with the same ID exists already in cart?
+        if (productDetails.hasOwnProperty(productId)) {
+
+          // Product already exists, update the quantity
+          productDetails[productId].quantity += 1;
+          productDetails[productId].totalprice = productDetails[productId].pricea * productDetails[productId].quantity;
+          billamt+=productDetails[productId].pricea;
+
+          const productDiv = listDiv.getElementsByClassName('item')[productDetails[productId].rownumber - 1];
+          productDiv.querySelector('.quantity').textContent = `${productDetails[productId].quantity}`;
+          productDiv.querySelector('.returnPrice').textContent = `₹ ${productDetails[productId].totalprice}`;
+          document.getElementsByClassName('totalPrice')[0].innerText = `₹ ${billamt}`;
+          document.getElementsByClassName('totalQuantity')[0].innerText = `${quan}`;
+
+        } else {
+
+          pname1 = detail.product_name;
+          // Product doesn't exist, create a new entry
+          productDetails[productId] = {
+            pname: pname1,
+            rownumber: n,
+            quantity: 1,
+            pricea: 0,
+            totalprice: 0,
+          };
+          productDetails[productId].totalprice = productDetails[productId].pricea = detail.price;
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('item');
+          // Create a new paragraph for the product
+          itemDiv.innerHTML = `
+              <img src=${detail.image} type="module"/>
+              <div class="info">
+                  <div class="name">${detail.product_name}</div>
+                  <div class="price">₹ ${detail.price} per piece</div>
+              </div>
+              <div class="quantity"> ${productDetails[productId].quantity}</div>
+              <div class="returnPrice">₹ ${productDetails[productId].totalprice}</div>
+          `;
+          listDiv.appendChild(itemDiv);
+          n += 1;
+          billamt+=productDetails[productId].pricea;
+          document.getElementsByClassName('totalPrice')[0].innerText = `₹ ${billamt}`;
+          document.getElementsByClassName('totalQuantity')[0].innerText = `${quan}`;
+
+        }
+        console.log(productDetails)
+      });
+    });
+    
+    const button = document.getElementsByClassName("buttonCheckout")[0]
+    
+    button.addEventListener("click",() => {
+      const itemsArray = [];
+      
+      for (const productId in productDetails) {
+        if (productDetails.hasOwnProperty(productId)) {
+          const product = productDetails[productId];
+          itemsArray.push({
+            id: productId,
+            name: product.pname,
+            quantity: product.quantity,
+            price: product.pricea,
+          });
+        }
+      }
+
+      fetch("/create-checkout-session", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: itemsArray,
+        }),
+      })
+        .then(res => {
+          if (res.ok) return res.json()
+          return res.json().then(json => Promise.reject(json))
+        })
+        .then(({ url }) => {
+          window.location = url
+        })
+        .catch(e => {
+          console.error(e.error)
+        })
+    })
+  </script>
+</body>
+</html>
